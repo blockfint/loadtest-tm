@@ -1,0 +1,11 @@
+{
+  "name": "loadtest-tm",
+  "version": "1.0.0",
+  "description": "",
+  "scripts": {},
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "nanotimer": "^0.3.15"
+  }
+}

@@ -44,6 +44,10 @@ let address = [
     host: '127.0.0.1',
     port: '8102',
   },
+  {
+    host: '127.0.0.1',
+    port: '8103',
+  },
 ];
 
 async function callRequest(_duration, _mode) {
@@ -56,7 +60,7 @@ async function callRequest(_duration, _mode) {
 
 async function PostRequest() {
   try {
-    const index = messageCounter % 3;
+    const index = messageCounter % address.length;
     var post_data = JSON.stringify(data);
     var post_options = {
       host: address[index].host,

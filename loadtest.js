@@ -7,7 +7,9 @@ var timer = new NanoTimer();
 var messageCounter = 0;
 let duration = process.env.DURATION || 1;
 let txpersec = process.env.TXPERSEC || 1;
-let reference_id = 0
+let reference_id = 0;
+let max_connection = 0;
+let connection = 0;
 
 let data = {
   mode: 1,
@@ -31,24 +33,48 @@ let data = {
   request_timeout: 259200,
 };
 
+// let data = {
+//   NodeID: 'rp1',
+//   Amount: 10000,
+// };
+
 let address = [
   {
-    host: '127.0.0.1',
+    host: '168.63.232.85',
     port: '8100',
   },
   {
-    host: '127.0.0.1',
-    port: '8101',
+    host: '168.63.239.70',
+    port: '8100',
   },
   {
-    host: '127.0.0.1',
-    port: '8102',
+    host: '168.63.239.13',
+    port: '8100',
   },
   {
-    host: '127.0.0.1',
-    port: '8103',
+    host: '168.63.238.33',
+    port: '8100',
   },
 ];
+
+// let address = [
+//   {
+//     host: '127.0.0.1',
+//     port: '8100',
+//   },
+//   {
+//     host: '127.0.0.1',
+//     port: '8101',
+//   },
+//   {
+//     host: '127.0.0.1',
+//     port: '8102',
+//   },
+//   {
+//     host: '127.0.0.1',
+//     port: '8103',
+//   },
+// ];
 
 async function callRequest(_duration, _mode) {
   var duration_microsec = _duration * 1000000 + 500 + 'u';
@@ -66,12 +92,19 @@ async function PostRequest() {
       host: address[index].host,
       port: address[index].port,
       path: '/v2/rp/requests/cid/12345',
+      // path: '/v2/setToken',
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
     };
+    connection++;
+    if (connection > max_connection) {
+      max_connection = connection;
+      console.log('Max connection : ', max_connection);
+    }
     var post_req = http.request(post_options, function(res) {
+      connection--;
       res.setEncoding('utf8');
     });
 

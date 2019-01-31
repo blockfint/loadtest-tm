@@ -2,10 +2,14 @@
   "name": "loadtest-tm",
   "version": "1.0.0",
   "description": "",
-  "scripts": {},
+  "scripts": {
+  },
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "nanotimer": "^0.3.15"
+    "accurate-interval": "^1.0.9",
+    "nanotimer": "^0.3.15",
+    "node-fetch": "^2.3.0",
+    "uuid": "^3.3.2"
   }
 }

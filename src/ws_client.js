@@ -24,7 +24,8 @@ import EventEmitter from 'events';
 import WebSocket from 'ws';
 import { ExponentialBackoff } from 'simple-backoff';
 
-let tendermintAddress = '52.163.191.111:26000';
+let tendermintAddress =
+  process.env.TENDERMINT_ADDRESS || '52.163.191.111:26000';
 // import { tendermintAddress } from '../config';
 // import CustomError from 'ndid-error/custom_error';
 

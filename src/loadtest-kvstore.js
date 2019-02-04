@@ -1,18 +1,23 @@
 const fetch = require('node-fetch');
 const uuidv4 = require('uuid/v4');
 const accurateInterval = require('accurate-interval');
-var uuidv1 = require('uuid/v1');
+const uuidv1 = require('uuid/v1');
+
+import * as tendermintWsPool from './ws_pool';
 
 const jobs = {};
 
-const IP = '52.163.191.111';
-const PORT = '26000';
+const IP = process.env.TM_IP || '52.163.191.111';
+const PORT = process.env.TM_PORT || '26000';
 
 var messageCounter = 0;
 let duration = process.env.DURATION || 1;
 let txpersec = process.env.TXPERSEC || 1;
-let max_connection = 0;
-let connection = 0;
+
+let keyV1 = uuidv1();
+let valueV4 = uuidv4();
+let keyRunningNumber = 0;
+let valueRunningNumber = 0;
 
 function startJob(duration, interval, requestsPerInterval) {
   let jobId = uuidv4();
@@ -58,19 +63,38 @@ function stopJob(jobId) {
 
 async function createRequestToPlatform() {
   try {
-    let key = uuidv1();
-    let value = uuidv4();
-    connection++;
-    await fetch(`http://${IP}:${PORT}/broadcast_tx_sync?tx="${key}=${value}"`);
-    if (connection > max_connection) {
-      max_connection = connection;
-      console.log('Max connection : ', max_connection);
-    }
-    connection--;
+    // let key = `${keyV1}${keyRunningNumber++}`;
+    // let value = `${valueV4}${valueRunningNumber++}`;
+    // connection++;
+    // await fetch(`http://${IP}:${PORT}/broadcast_tx_sync?tx="${key}=${value}"`);
+    // if (connection > max_connection) {
+    //   max_connection = connection;
+    //   console.log('Max connection : ', max_connection);
+    // }
+    // connection--;
+    // messageCounter++;
+    let key = `${keyV1}${keyRunningNumber++}`;
+    let value = `${valueV4}${valueRunningNumber++}`;
+    let param = `${key}=${value}`;
+    let buffer = Buffer.from(param, 'utf8');
+    await tendermintWsPool.getConnection().broadcastTxSync(buffer);
     messageCounter++;
   } catch (error) {
-    throw error;
+    console.error(error);
   }
 }
 
-startJob(duration, 1, txpersec);
+async function connectWS(duration, txpersec) {
+  await tendermintWsPool.initialize();
+  startJob(duration, 1, txpersec);
+}
+
+async function test() {
+  let key = `${keyV1}${keyRunningNumber++}`;
+  let value = `${valueV4}${valueRunningNumber++}`;
+  let param = `${key}=${value}`;
+  let a = Buffer.from(param, 'utf8');
+  await tendermintWsPool.getConnection().broadcastTxSync(a);
+}
+
+connectWS(duration, txpersec);

@@ -1,0 +1,15 @@
+version: '3'
+services:
+  load-tester:
+    image: jirapus/did-tendermint:loadtest-kvstore
+    environment:
+      - DURATION=${DURATION}
+      - TXPERSEC=${TXPERSEC}
+    entrypoint: npm
+    command:
+      - start
+    networks:
+      - ndidplatform
+
+networks:
+  ndidplatform:

@@ -1,9 +1,18 @@
-const fetch = require('node-fetch');
-const uuidv4 = require('uuid/v4');
-const accurateInterval = require('accurate-interval');
-const uuidv1 = require('uuid/v1');
-
+import protobuf from 'protobufjs';
+import path from 'path';
+import fetch from 'node-fetch';
+import uuidv4 from 'uuid/v4';
+import accurateInterval from 'accurate-interval';
+import uuidv1 from 'uuid/v1';
 import * as tendermintWsPool from './ws_pool';
+import * as utils from './utils';
+
+const tendermintProtobufRootInstance = new protobuf.Root();
+const tendermintProtobufRoot = tendermintProtobufRootInstance.loadSync(
+  path.join(__dirname, '..', 'protos', 'tendermint.proto'),
+  { keepCase: true }
+);
+const TendermintTx = tendermintProtobufRoot.lookupType('Tx');
 
 const jobs = {};
 
@@ -73,11 +82,38 @@ async function createRequestToPlatform() {
     // }
     // connection--;
     // messageCounter++;
+
     let key = `${keyV1}${keyRunningNumber++}`;
-    let value = `${valueV4}${valueRunningNumber++}`;
-    let param = `${key}=${value}`;
-    let buffer = Buffer.from(param, 'utf8');
-    await tendermintWsPool.getConnection().broadcastTxSync(buffer);
+
+    // let value = `${valueV4}${valueRunningNumber++}`;
+    // let param = `${key}=${value}`;
+    // let buffer = Buffer.from(param, 'utf8');
+    const requestDataToBlockchain = {
+      mode: 1,
+      request_id: key,
+      min_idp: 1,
+      min_aal: 1,
+      min_ial: 1.1,
+      request_timeout: 3600,
+      data_request_list: {
+        service_id: 'bank_statement',
+        as_id_list: ['as_1'],
+        min_as: 1,
+        request_params_hash: 'hash',
+      },
+      request_message_hash: 'hash',
+      idp_id_list: ['idp_1'],
+      purpose: null,
+    };
+
+    let request = {
+      nodeId: 'rp_1',
+      fnName: 'CreateRequest',
+      params: requestDataToBlockchain,
+    };
+
+    transact(request);
+    // await tendermintWsPool.getConnection().broadcastTxSync(buffer);
     messageCounter++;
   } catch (error) {
     console.error(error);
@@ -89,3 +125,35 @@ async function connectWS(duration, txpersec) {
   startJob(duration, 1, txpersec);
 }
 connectWS(duration, txpersec);
+
+async function transact({
+  nodeId,
+  fnName,
+  params,
+  nonce = utils.getNonce(),
+  useMasterKey = false,
+}) {
+  const paramsJsonString = JSON.stringify(params);
+  const txObject = {
+    method: fnName,
+    params: paramsJsonString,
+    nonce,
+    signature: await utils.createSignature(
+      Buffer.concat([
+        Buffer.from(fnName, 'utf8'),
+        Buffer.from(paramsJsonString, 'utf8'),
+        nonce,
+      ]).toString('base64'),
+      nodeId,
+      useMasterKey
+    ),
+    node_id: nodeId,
+  };
+
+  const txProto = TendermintTx.create(txObject);
+  const txProtoBuffer = TendermintTx.encode(txProto).finish();
+  const responseResult = await tendermintWsPool
+    .getConnection()
+    .broadcastTxSync(txProtoBuffer);
+  console.log(responseResult);
+}

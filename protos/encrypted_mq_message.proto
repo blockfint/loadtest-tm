@@ -1,0 +1,6 @@
+syntax = "proto3";
+
+message EncryptedMqMessage {
+  bytes encrypted_symmetric_key = 1;
+  bytes encrypted_mq_message = 2;
+}

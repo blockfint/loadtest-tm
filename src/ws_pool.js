@@ -23,7 +23,7 @@ import TendermintWsClient from './ws_client';
 
 // import logger from '../logger';
 
-let tendermintWsConnections = 50;
+let tendermintWsConnections = 1;
 
 // import logger from '../logger';
 

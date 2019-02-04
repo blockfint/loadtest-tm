@@ -1,0 +1,44 @@
+syntax = "proto3";
+ 
+service MessageQueue {
+  rpc subscribeToRecvMessages(Empty) returns (stream InboundMessage){}
+  rpc sendAckForRecvMessage(InboundMessageAck) returns(Empty){}
+  rpc sendMessage(OutboundMessage) returns (Empty){}
+  rpc getInfo(Empty) returns (ServiceServerInfo){}
+}
+ 
+message InboundMessage {
+  bytes message = 1;
+  int64 message_id = 2;
+  string sender_id = 3;
+  Error error = 4;
+}
+
+message InboundMessageAck {
+  int64 message_id = 1;
+}
+
+message OutboundMessage {
+  MqAddress mq_address = 1;
+  bytes payload = 2;
+  int64 message_id = 3;
+}
+
+message MqAddress {
+  string ip = 1;
+  int32 port = 2;
+}
+
+message Error {
+  int32 code = 1;
+  string message = 2;
+}
+
+message ServiceServerInfo {
+  string node_id = 1;
+  int32 mq_binding_port = 2;
+}
+
+message Empty {
+
+}

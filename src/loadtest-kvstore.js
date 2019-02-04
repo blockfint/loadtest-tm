@@ -7,8 +7,8 @@ import * as tendermintWsPool from './ws_pool';
 
 const jobs = {};
 
-const IP = process.env.TM_IP || '52.163.191.111';
-const PORT = process.env.TM_PORT || '26000';
+// const IP = process.env.TM_IP || '52.163.191.111';
+// const PORT = process.env.TM_PORT || '26000';
 
 var messageCounter = 0;
 let duration = process.env.DURATION || 1;
@@ -88,13 +88,4 @@ async function connectWS(duration, txpersec) {
   await tendermintWsPool.initialize();
   startJob(duration, 1, txpersec);
 }
-
-async function test() {
-  let key = `${keyV1}${keyRunningNumber++}`;
-  let value = `${valueV4}${valueRunningNumber++}`;
-  let param = `${key}=${value}`;
-  let a = Buffer.from(param, 'utf8');
-  await tendermintWsPool.getConnection().broadcastTxSync(a);
-}
-
 connectWS(duration, txpersec);

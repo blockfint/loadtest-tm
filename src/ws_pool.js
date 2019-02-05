@@ -23,7 +23,7 @@ import TendermintWsClient from './ws_client';
 
 // import logger from '../logger';
 
-let tendermintWsConnections = 1;
+let tendermintWsConnections = process.env.WS_CONNECTION || 10;
 
 // import logger from '../logger';
 

@@ -1,7 +1,7 @@
 version: '3'
 services:
   load-tester:
-    image: jirapus/did-tendermint:loadtest-kvstore
+    image: jirapus/did-tendermint:loadtest-abci-create-request
     environment:
       - DURATION=${DURATION}
       - TXPERSEC=${TXPERSEC}

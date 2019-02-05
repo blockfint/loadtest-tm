@@ -24,8 +24,7 @@ import EventEmitter from 'events';
 import WebSocket from 'ws';
 import { ExponentialBackoff } from 'simple-backoff';
 
-let tendermintAddress =
-  process.env.TENDERMINT_ADDRESS || '207.46.237.44:26000';
+let tendermintAddress = process.env.TENDERMINT_ADDRESS || '207.46.237.44:26000';
 // import { tendermintAddress } from '../config';
 // import CustomError from 'ndid-error/custom_error';
 
@@ -167,7 +166,7 @@ export default class TendermintWsClient extends EventEmitter {
           //     rpcId,
           //   },
           // });
-          this.queue[rpcId].promise[1](error);
+          this.queue[rpcId].promise[1](message.error);
         } else {
           this.queue[rpcId].promise[0](message.result);
         }

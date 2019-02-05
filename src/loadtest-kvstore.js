@@ -95,12 +95,14 @@ async function createRequestToPlatform() {
       min_aal: 1,
       min_ial: 1.1,
       request_timeout: 3600,
-      data_request_list: {
-        service_id: 'bank_statement',
-        as_id_list: ['as_1'],
-        min_as: 1,
-        request_params_hash: 'hash',
-      },
+      data_request_list: [
+        {
+          service_id: 'bank_statement',
+          as_id_list: ['as_1'],
+          min_as: 1,
+          request_params_hash: 'hash',
+        },
+      ],
       request_message_hash: 'hash',
       idp_id_list: ['idp_1'],
       purpose: null,
@@ -155,5 +157,4 @@ async function transact({
   const responseResult = await tendermintWsPool
     .getConnection()
     .broadcastTxSync(txProtoBuffer);
-  console.log(responseResult);
 }

@@ -96,7 +96,12 @@ export default class TendermintWsClient extends EventEmitter {
           //     rpcId,
           //   },
           // });
-          this.queue[rpcId].promise[1](error);
+          this.queue[rpcId].promise[1]({
+            message: 'Connection closed',
+            details: {
+              rpcId,
+            },
+          });
           delete this.queue[rpcId];
         }
 
@@ -307,7 +312,7 @@ export default class TendermintWsClient extends EventEmitter {
         params: params || null,
         id: id.toString(),
       };
-      console.log('Calling Tendermint through WS: ', this.name, message);
+      // console.log('Calling Tendermint through WS: ', this.name, message);
 
       // logger.debug({
       //   message: 'Calling Tendermint through WS',

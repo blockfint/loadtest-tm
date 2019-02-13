@@ -5,6 +5,7 @@ services:
     environment:
       - DURATION=${DURATION}
       - TXPERSEC=${TXPERSEC}
+      - WS_CONNECTION=${WS_CONNECTION:-10}
     entrypoint: npm
     command:
       - start

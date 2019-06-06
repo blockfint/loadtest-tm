@@ -103,10 +103,11 @@ async function createRequestToPlatform() {
 
 async function connectWS(duration, txpersec) {
   await tendermintWsPool.initialize();
+  await registerMasterNode();
+  await utils.wait(5000);
   if (setValidator) {
     await setValidators();
   }
-  await registerMasterNode();
   startJob(duration, 1, txpersec);
 }
 

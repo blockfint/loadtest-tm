@@ -54,3 +54,17 @@ export function randomBufferBytes(length) {
 export function getNonce() {
   return randomBufferBytes(32);
 }
+
+export function wait(ms, stoppable) {
+  let setTimeoutFn;
+  const promise = new Promise(
+    (resolve) => (setTimeoutFn = setTimeout(resolve, ms))
+  );
+  if (stoppable) {
+    return {
+      promise,
+      stopWaiting: () => clearTimeout(setTimeoutFn),
+    };
+  }
+  return promise;
+}

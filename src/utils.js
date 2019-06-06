@@ -2,7 +2,7 @@ import fs from 'fs';
 import crypto from 'crypto';
 import path from 'path';
 
-const privateKey = fs.readFileSync(path.join(__dirname, '..', 'keys', 'rp_1'));
+const privateKey = fs.readFileSync(path.join(__dirname, '..', 'keys', 'node_1'));
 
 export async function createSignature(messageToSign, nodeId, useMasterKey) {
   if (typeof messageToSign !== 'string') {

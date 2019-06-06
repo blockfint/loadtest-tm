@@ -1,11 +1,11 @@
 import protobuf from 'protobufjs';
 import path from 'path';
-import fetch from 'node-fetch';
 import uuidv4 from 'uuid/v4';
 import accurateInterval from 'accurate-interval';
 import uuidv1 from 'uuid/v1';
 import * as tendermintWsPool from './ws_pool';
 import * as utils from './utils';
+import fs from 'fs';
 
 const tendermintProtobufRootInstance = new protobuf.Root();
 const tendermintProtobufRoot = tendermintProtobufRootInstance.loadSync(
@@ -14,7 +14,19 @@ const tendermintProtobufRoot = tendermintProtobufRootInstance.loadSync(
 );
 const TendermintTx = tendermintProtobufRoot.lookupType('Tx');
 
+const pubKey = fs.readFileSync(
+  path.join(__dirname, '..', 'keys', 'node_1.pub'),
+  'utf8'
+);
+const masterPubKey = fs.readFileSync(
+  path.join(__dirname, '..', 'keys', 'node_1_master.pub'),
+  'utf8'
+);
+
 const jobs = {};
+
+let from = uuidv1() + '123456789012345678901A';
+let to = uuidv4() + '123456789012345678901';
 
 // const IP = process.env.TM_IP || '52.163.191.111';
 // const PORT = process.env.TM_PORT || '26000';
@@ -22,11 +34,7 @@ const jobs = {};
 var messageCounter = 0;
 let duration = process.env.DURATION || 1;
 let txpersec = process.env.TXPERSEC || 1;
-
-let keyV1 = uuidv1();
-let valueV4 = uuidv4();
-let keyRunningNumber = 0;
-let valueRunningNumber = 0;
+let setValidator = process.env.SET_VALIDATOR || false;
 
 function startJob(duration, interval, requestsPerInterval) {
   let jobId = uuidv4();
@@ -72,45 +80,16 @@ function stopJob(jobId) {
 
 async function createRequestToPlatform() {
   try {
-    // let key = `${keyV1}${keyRunningNumber++}`;
-    // let value = `${valueV4}${valueRunningNumber++}`;
-    // connection++;
-    // await fetch(`http://${IP}:${PORT}/broadcast_tx_sync?tx="${key}=${value}"`);
-    // if (connection > max_connection) {
-    //   max_connection = connection;
-    //   console.log('Max connection : ', max_connection);
-    // }
-    // connection--;
-    // messageCounter++;
-
-    let key = `${keyV1}${keyRunningNumber++}`;
-
-    // let value = `${valueV4}${valueRunningNumber++}`;
-    // let param = `${key}=${value}`;
-    // let buffer = Buffer.from(param, 'utf8');
     const requestDataToBlockchain = {
-      mode: 1,
-      request_id: key,
-      min_idp: 1,
-      min_aal: 1,
-      min_ial: 1.1,
-      request_timeout: 3600,
-      data_request_list: [
-        {
-          service_id: 'bank_statement',
-          as_id_list: ['as_1'],
-          min_as: 1,
-          request_params_hash: 'hash',
-        },
-      ],
-      request_message_hash: 'hash',
-      idp_id_list: ['idp_1'],
-      purpose: null,
+      from: from,
+      to: to,
+      price: 100,
+      amount: 1000,
     };
 
     let request = {
-      nodeId: 'rp_1',
-      fnName: 'CreateRequest',
+      nodeId: 'node_1',
+      fnName: 'SetTx',
       params: requestDataToBlockchain,
     };
 
@@ -124,9 +103,12 @@ async function createRequestToPlatform() {
 
 async function connectWS(duration, txpersec) {
   await tendermintWsPool.initialize();
+  if (setValidator) {
+    await setValidators();
+  }
+  await registerMasterNode();
   startJob(duration, 1, txpersec);
 }
-connectWS(duration, txpersec);
 
 async function transact({
   nodeId,
@@ -158,3 +140,43 @@ async function transact({
     .getConnection()
     .broadcastTxSync(txProtoBuffer);
 }
+
+async function registerMasterNode() {
+  let registerMasterNodeParams = {
+    node_id: 'node_1',
+    public_key: pubKey,
+    master_public_key: masterPubKey,
+    node_name: 'This is node 1!',
+  };
+
+  let request = {
+    nodeId: 'node_1',
+    fnName: 'RegisterMasterNode',
+    params: registerMasterNodeParams,
+  };
+
+  await transact(request);
+}
+
+function setValidators() {
+  return Promise.all(
+    [
+      'kRKM3mkPlogAhWLARAoE9nG+i+fFbZLQDMZoS1O50So=',
+      'JdIMZ1BliC7qYsph0kGSECCoEu2xgqwToBOiJ434cLM=',
+      'TVq7ovzVhpPEe7T9qwxfG7zkg1JzY9+dq3EyMnoUYuQ=',
+    ].map(async (pubKey, index) => {
+      let setValidatorParams = {
+        public_key: pubKey,
+        power: 10,
+      };
+
+      let request = {
+        nodeId: 'node_1',
+        fnName: 'SetValidator',
+        params: setValidatorParams,
+      };
+      await transact(request);
+    })
+  );
+}
+connectWS(duration, txpersec);

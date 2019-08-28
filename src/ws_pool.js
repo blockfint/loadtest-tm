@@ -42,8 +42,6 @@ let availableConnectionPromise = null;
 let availableConnectionPromiseResolve = null;
 let connectedWsCount = 0;
 
-export const metricsEventEmitter = new EventEmitter();
-
 function connectWS(wsClient) {
   return new Promise(resolve => {
     wsClient.once('connected', () => resolve());

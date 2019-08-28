@@ -123,15 +123,15 @@ async function transact({
     method: fnName,
     params: paramsJsonString,
     nonce,
-    signature: await utils.createSignature(
-      Buffer.concat([
-        Buffer.from(fnName, 'utf8'),
-        Buffer.from(paramsJsonString, 'utf8'),
-        nonce,
-      ]).toString('base64'),
-      nodeId,
-      useMasterKey
-    ),
+    // signature: await utils.createSignature(
+    //   Buffer.concat([
+    //     Buffer.from(fnName, 'utf8'),
+    //     Buffer.from(paramsJsonString, 'utf8'),
+    //     nonce,
+    //   ]).toString('base64'),
+    //   nodeId,
+    //   useMasterKey
+    // ),
     node_id: nodeId,
   };
 

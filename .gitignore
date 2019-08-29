@@ -1,3 +1,5 @@
 /node_modules
 *.txt
 /build
+/monitor/grafana_data
+/monitor/prometheus_data

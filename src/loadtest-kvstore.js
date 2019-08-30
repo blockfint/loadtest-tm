@@ -10,17 +10,17 @@ import fs from 'fs';
 const tendermintProtobufRootInstance = new protobuf.Root();
 const tendermintProtobufRoot = tendermintProtobufRootInstance.loadSync(
   path.join(__dirname, '..', 'protos', 'tendermint.proto'),
-  { keepCase: true }
+  { keepCase: true },
 );
 const TendermintTx = tendermintProtobufRoot.lookupType('Tx');
 
 const pubKey = fs.readFileSync(
   path.join(__dirname, '..', 'keys', 'node_1.pub'),
-  'utf8'
+  'utf8',
 );
 const masterPubKey = fs.readFileSync(
   path.join(__dirname, '..', 'keys', 'node_1_master.pub'),
-  'utf8'
+  'utf8',
 );
 
 const jobs = {};
@@ -130,10 +130,24 @@ async function transact({
     //     nonce,
     //   ]).toString('base64'),
     //   nodeId,
-    //   useMasterKey
+    //   useMasterKey,
     // ),
     node_id: nodeId,
   };
+  if (fnName !== 'SetTx') {
+    txObject = {
+      ...txObject,
+      signature: await utils.createSignature(
+        Buffer.concat([
+          Buffer.from(fnName, 'utf8'),
+          Buffer.from(paramsJsonString, 'utf8'),
+          nonce,
+        ]).toString('base64'),
+        nodeId,
+        useMasterKey,
+      ),
+    };
+  }
 
   const txProto = TendermintTx.create(txObject);
   const txProtoBuffer = TendermintTx.encode(txProto).finish();
@@ -177,7 +191,7 @@ function setValidators() {
         params: setValidatorParams,
       };
       await transact(request);
-    })
+    }),
   );
 }
 connectWS(duration, txpersec);

@@ -119,7 +119,7 @@ async function transact({
   useMasterKey = false,
 }) {
   const paramsJsonString = JSON.stringify(params);
-  const txObject = {
+  let txObject = {
     method: fnName,
     params: paramsJsonString,
     nonce,

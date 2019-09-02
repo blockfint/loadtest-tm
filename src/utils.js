@@ -2,7 +2,12 @@ import fs from 'fs';
 import crypto from 'crypto';
 import path from 'path';
 
-const privateKey = fs.readFileSync(path.join(__dirname, '..', 'keys', 'node_1'));
+const privateKey = fs.readFileSync(
+  path.join(__dirname, '..', 'keys', 'node_1'),
+);
+// const publicKey = fs.readFileSync(
+//   path.join(__dirname, '..', 'keys', 'node_1.pub'),
+// );
 
 export async function createSignature(messageToSign, nodeId, useMasterKey) {
   if (typeof messageToSign !== 'string') {
@@ -23,7 +28,10 @@ export async function createSignature(messageToSign, nodeId, useMasterKey) {
 
   const key = privateKey;
 
-  return cryptoCreateSignature(messageToSign, {
+  // return cryptoCreateSignature(messageToSign, {
+  //   key,
+  // });
+  return cryptoCreateSignatureECDSA(messageToSign, {
     key,
   });
 }
@@ -47,6 +55,10 @@ export function cryptoCreateSignature(message, privateKey) {
     .sign(privateKey);
 }
 
+export function cryptoCreateSignatureECDSA(message, privateKey) {
+  return (signature = crypto.sign(null, data, privateKey));
+}
+
 export function randomBufferBytes(length) {
   return crypto.randomBytes(length);
 }
@@ -58,7 +70,7 @@ export function getNonce() {
 export function wait(ms, stoppable) {
   let setTimeoutFn;
   const promise = new Promise(
-    (resolve) => (setTimeoutFn = setTimeout(resolve, ms))
+    resolve => (setTimeoutFn = setTimeout(resolve, ms)),
   );
   if (stoppable) {
     return {

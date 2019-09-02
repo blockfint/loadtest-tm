@@ -123,23 +123,17 @@ async function transact({
     method: fnName,
     params: paramsJsonString,
     nonce,
-    signature: 'Some-Signature',
+    signature: await utils.createSignature(
+      Buffer.concat([
+        Buffer.from(fnName, 'utf8'),
+        Buffer.from(paramsJsonString, 'utf8'),
+        nonce,
+      ]).toString('base64'),
+      nodeId,
+      useMasterKey,
+    ),
     node_id: nodeId,
   };
-  if (fnName !== 'SetTx') {
-    txObject = {
-      ...txObject,
-      signature: await utils.createSignature(
-        Buffer.concat([
-          Buffer.from(fnName, 'utf8'),
-          Buffer.from(paramsJsonString, 'utf8'),
-          nonce,
-        ]).toString('base64'),
-        nodeId,
-        useMasterKey,
-      ),
-    };
-  }
 
   const txProto = TendermintTx.create(txObject);
   const txProtoBuffer = TendermintTx.encode(txProto).finish();

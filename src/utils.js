@@ -56,7 +56,7 @@ export function cryptoCreateSignature(message, privateKey) {
 }
 
 export function cryptoCreateSignatureECDSA(message, privateKey) {
-  return (signature = crypto.sign(null, data, privateKey));
+  return (signature = crypto.sign(null, message, privateKey));
 }
 
 export function randomBufferBytes(length) {

@@ -119,22 +119,22 @@ async function transact({
   useMasterKey = false,
 }) {
   const paramsJsonString = JSON.stringify(params);
+  let signature = await utils.createSignature(
+    Buffer.concat([
+      Buffer.from(fnName, 'utf8'),
+      Buffer.from(paramsJsonString, 'utf8'),
+      nonce,
+    ]).toString('base64'),
+    nodeId,
+    useMasterKey,
+  );
   let txObject = {
     method: fnName,
     params: paramsJsonString,
     nonce,
-    signature: await utils.createSignature(
-      Buffer.concat([
-        Buffer.from(fnName, 'utf8'),
-        Buffer.from(paramsJsonString, 'utf8'),
-        nonce,
-      ]).toString('base64'),
-      nodeId,
-      useMasterKey,
-    ),
+    signature,
     node_id: nodeId,
   };
-
   const txProto = TendermintTx.create(txObject);
   const txProtoBuffer = TendermintTx.encode(txProto).finish();
   const responseResult = await tendermintWsPool

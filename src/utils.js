@@ -15,9 +15,8 @@ export async function createSignature(messageToSign, nodeId, useMasterKey) {
       message: 'Expected message to sign to be a string',
     });
   }
-  if (typeof messageToSign === 'string') {
     messageToSign = Buffer.from(messageToSign, 'utf8');
-  }
+  
   // const messageToSignHash = hash(messageToSign);
 
   // if (config.useExternalCryptoService) {
@@ -34,7 +33,7 @@ export async function createSignature(messageToSign, nodeId, useMasterKey) {
   // return cryptoCreateSignature(messageToSign, {
   //   key,
   // });
-  return cryptoCreateSignatureECDSA(messageToSign, {
+  return cryptoCreateSignatureED25519(messageToSign, {
     key,
   });
 }
@@ -58,8 +57,8 @@ export function cryptoCreateSignature(message, privateKey) {
     .sign(privateKey);
 }
 
-export function cryptoCreateSignatureECDSA(message, privateKey) {
-  return crypto.sign('sha256', message, privateKey);
+export function cryptoCreateSignatureED25519(message, privateKey) {
+  return crypto.sign(null, message, privateKey);
 }
 
 export function randomBufferBytes(length) {
